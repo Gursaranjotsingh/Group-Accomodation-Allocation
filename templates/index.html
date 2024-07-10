@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Accommodation Allocation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Group Accommodation Allocation</h1>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <h2>Upload Group Information CSV</h2>
+            <input type="file" id="groupInfoFile" name="groupInfoFile" accept=".csv">
+            <h2>Upload Hostel Information CSV</h2>
+            <input type="file" id="hostelInfoFile" name="hostelInfoFile" accept=".csv">
+            <button type="button" onclick="uploadFiles()">Upload and Allocate</button>
+        </form>
+    </div>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+</body>
+</html>

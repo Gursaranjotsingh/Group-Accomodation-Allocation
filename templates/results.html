@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Allocation Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Allocation Results</h1>
+        <div id="results">
+            <ul>
+                {% for item in allocation %}
+                <li>Group ID: {{ item.GroupID }}, Hostel Name: {{ item.HostelName }}, Room Number: {{ item.RoomNumber }}, Members Allocated: {{ item.MembersAllocated }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <a href="{{ url_for('download_csv') }}" id="downloadLink" style="display: {% if allocation %}block{% else %}none{% endif %};">Download Allocation CSV</a>
+        <a href="{{ url_for('index') }}">Back to Home</a>
+    </div>
+</body>
+</html>
