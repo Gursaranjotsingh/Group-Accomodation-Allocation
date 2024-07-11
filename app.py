@@ -1,12 +1,13 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 from flask_cors import CORS
+import io
 
 app = Flask(__name__)
-CORS(app)  
+CORS(app)  # Enable CORS for all origins
 
-allocation_results = []  
-csv_content = ""  
+allocation_results = []  # Global variable to store allocation results
+csv_content = ""  # Global variable to store CSV content
 
 @app.route('/')
 def index():
@@ -14,7 +15,7 @@ def index():
 
 @app.route('/results')
 def results():
-    return render_template('results.html', allocation=allocation_results, csv_content=csv_content)
+    return render_template('results.html', allocation=allocation_results)
 
 @app.route('/allocate', methods=['POST'])
 def allocate():
@@ -33,10 +34,15 @@ def allocate():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@app.route('/download_csv')
+def download_csv():
+    global csv_content
+    return send_file(io.BytesIO(csv_content.encode()), mimetype='text/csv', as_attachment=True, download_name='allocation.csv')
+
 def allocate_rooms(group_info_df, hostel_info_df):
     allocation = []
     hostels = hostel_info_df.to_dict('records')
-    csv_content = []
+    csv_lines = []
 
     for hostel in hostels:
         hostel['Occupancy'] = 0
@@ -57,7 +63,7 @@ def allocate_rooms(group_info_df, hostel_info_df):
                     "MembersAllocated": members
                 })
                 hostel['Occupancy'] += members
-                csv_content.append(f"{group_id},{hostel['HostelName']},{hostel['RoomNumber']},{members}\n")
+                csv_lines.append(f"{group_id},{hostel['HostelName']},{hostel['RoomNumber']},{members}")
                 allocated = True
                 break
             elif (gender == 'Girls' and hostel['Gender'] == 'Girls' and 
@@ -69,7 +75,7 @@ def allocate_rooms(group_info_df, hostel_info_df):
                     "MembersAllocated": members
                 })
                 hostel['Occupancy'] += members
-                csv_content.append(f"{group_id},{hostel['HostelName']},{hostel['RoomNumber']},{members}\n")
+                csv_lines.append(f"{group_id},{hostel['HostelName']},{hostel['RoomNumber']},{members}")
                 allocated = True
                 break
 
@@ -80,9 +86,10 @@ def allocate_rooms(group_info_df, hostel_info_df):
                 "RoomNumber": "N/A",
                 "MembersAllocated": members
             })
-            csv_content.append(f"{group_id},Not Allocated,N/A,{members}\n")
+            csv_lines.append(f"{group_id},Not Allocated,N/A,{members}")
 
-    return allocation, ''.join(csv_content)
+    csv_content = "GroupID,HostelName,RoomNumber,MembersAllocated\n" + "\n".join(csv_lines)
+    return allocation, csv_content
 
 if __name__ == '__main__':
     app.run(debug=True)
